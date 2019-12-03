@@ -6,9 +6,9 @@ class Randomaizer {
 
 
 class TamagDto {
-    constructor(statValue, name, actionName) {
+    constructor(statValue, statName, actionName) {
        this.statValue = statValue;
-       this.name = name;
+       this.name = statName;
        this.actionName = actionName;
     }
 }
@@ -72,19 +72,16 @@ class TamagModel {
     _eat() {
         this.eatStat = this._assignStat(this.eatStat, 30);
         this.cleanStat -= 30;
-        return this.getStats.call(this);
     }
 
     _clean() {
         this.cleanStat = this._assignStat(this.cleanStat, 40);
         this.happyStat -= 20;
-        return this.getStats.call(this);
     }
 
     _happy() {
         this.happyStat = this._assignStat(this.happyStat, 15);
         this.eatStat -= 10;
-        return this.getStats.call(this);
     }
 
     _assignStat(stat, increaseBy) {
@@ -102,7 +99,8 @@ class TamagView {
         this.action = action;
     }
 
-    // @param Array <TeamDto>
+    // @param statsDtos Array <TeamDto>
+    // @param timerDto [TimerDto]
     renderGame(statsDtos, timerDto) {
         this.elem.innerHTML = null;
 
@@ -134,10 +132,6 @@ class TamagView {
 
         this.elem.appendChild(timer)
     }
-
-    getElem() {
-        return this.elem
-    }
 }
 
 
@@ -151,6 +145,7 @@ class TamgControllerAbstract{
         this.temagView.setActionHandler(this.executeAction.bind(this));
 
         this.startTime = new Date();
+
         this._initTimer();
         this._initStatsDecreasing();
     }
@@ -159,9 +154,6 @@ class TamgControllerAbstract{
 
     executeAction(action) {
         this.tamagModel.executeAction(action);
-
-        if (this.tamagModel.isTamagDead()) return this._gameOver();
-
         this._renderGame();
     }
 
@@ -174,12 +166,14 @@ class TamgControllerAbstract{
     _initStatsDecreasing() {
         this.decreaseStatsId =  setInterval(() => {
             this._decreaseStats();
-            if (this.tamagModel.isTamagDead()) return this._gameOver();
+
             this._renderGame();
         }, 5000)
     };
 
     _renderGame() {
+        if (this.tamagModel.isTamagDead()) return this._gameOver();
+
         this.temagView.renderGame(
             this._getTamagStats(),
             new TimerDto(this.startTime)
@@ -193,7 +187,7 @@ class TamgControllerAbstract{
     _gameOver() {
         clearInterval(this.timerId);
         clearInterval(this.decreaseStatsId);
-        this.main.changeState(new GameOver(this.main))
+        this.main.changeState(new GameOverState(this.main))
     }
 
     _decreaseStats() {
@@ -218,11 +212,10 @@ class TamagFactory {
     static get LAZY_TYPE() { return 'lazy' };
     static get HARDCORE_TYPE() { return 'hardcore' };
 
-    static get TAMAG_TYPES() {return [TamagFactory.LAZY_TYPE, TamagFactory.HARDCORE_TYPE]}
-
+    static get TAMAG_TYPES() { return [TamagFactory.LAZY_TYPE, TamagFactory.HARDCORE_TYPE] }
 
     static getGameByType(type, main) {
-        let tamagView = new TamagView(main.getElem());
+        let tamagView = new TamagView(main.getRootElem());
 
         switch (type) {
             case TamagFactory.LAZY_TYPE:
@@ -236,24 +229,10 @@ class TamagFactory {
 }
 
 
-class NewGame {
+class NewGameState {
     constructor(main) {
         this.main = main;
-        this.elem = main.getElem();
-    };
-
-    _handleStart(select) {
-        let selectedGameType = select.value;
-
-        if (TamagFactory.TAMAG_TYPES.includes(selectedGameType)) {
-            this._startNewGame(selectedGameType);
-        } else {
-            alert("select type");
-        }
-    };
-
-    _startNewGame(selectedGameType) {
-        this.main.changeState(new GameInProgress(this.main, selectedGameType))
+        this.elem = main.getRootElem();
     };
 
     render() {
@@ -274,16 +253,26 @@ class NewGame {
         this.elem.appendChild(select);
         this.elem.appendChild(button);
     }
-}
 
-class GameOver {
-    constructor(main) {
-        this.main = main;
-        this.elem = main.getElem();
+    _handleStart(select) {
+        let selectedGameType = select.value;
+
+        if (TamagFactory.TAMAG_TYPES.includes(selectedGameType)) {
+            this._startNewGame(selectedGameType);
+        } else {
+            alert("select type");
+        }
     };
 
-    _startNewGame() {
-        this.main.changeState(new NewGame(this.main));
+    _startNewGame(selectedGameType) {
+        this.main.changeState(new GameInProgressState(this.main, selectedGameType))
+    };
+}
+
+class GameOverState {
+    constructor(main) {
+        this.main = main;
+        this.elem = main.getRootElem();
     };
 
     render() {
@@ -297,9 +286,13 @@ class GameOver {
         this.elem.appendChild(gameOver);
         this.elem.appendChild(button);
     }
+
+    _startNewGame() {
+        this.main.changeState(new NewGameState(this.main));
+    };
 }
 
-class GameInProgress {
+class GameInProgressState {
     constructor(main, type) {
         this.game = TamagFactory.getGameByType(type, main);
     };
@@ -318,7 +311,7 @@ class Main {
 
     constructor(elem) {
         this.elem = elem;
-        this.state = new NewGame(this);
+        this.state = new NewGameState(this);
     }
 
     changeState(state) {
@@ -327,7 +320,7 @@ class Main {
         this.render();
     }
 
-    getElem() {
+    getRootElem() {
         return this.elem;
     }
 
@@ -339,28 +332,3 @@ class Main {
 Main.run(document.getElementById('game1'));
 // Main.run(document.getElementById('game2'));
 // Main.run(document.getElementById('game3'));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
