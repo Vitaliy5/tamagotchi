@@ -1,334 +1,438 @@
 class Randomaizer {
-    static getRandom(min, max) {
-        return Math.round(min + Math.random() * (max - min));
-    }
+  static getRandom(min, max) {
+    return Math.round(min + Math.random() * (max - min));
+  }
 }
 
+class TamagDtoStats {
+  constructor(statValue, statName) {
+    this.statValue = statValue;
+    this.name = statName;
+  }
+}
 
-class TamagDto {
-    constructor(statValue, statName, actionName) {
-       this.statValue = statValue;
-       this.name = statName;
-       this.actionName = actionName;
-    }
+class TamagDtoButton {
+  constructor(name, button) {
+    this.name = name;
+    this.btn = button;
+  }
 }
 
 class TimerDto {
-    constructor(startDate) {
-        let newDate = new Date(new Date() - startDate);
-        this.seconds = newDate.getSeconds();
-        this.minutes = newDate.getMinutes();
-    }
+  constructor(startDate) {
+    let newDate = new Date(new Date() - startDate);
+    this.seconds = newDate.getSeconds();
+    this.minutes = newDate.getMinutes();
+  }
 }
 
-
 class TamagModel {
-    static get DEFAULT_MIN_STAT() { return 50 };
-    static get DEFAULT_MAX_STAT() { return 70 };
+  static get DEFAULT_MIN_STAT() { return 50 };
+  static get DEFAULT_MAX_STAT() { return 70 };
 
-    static get EAT_FUNC_NAME()   { return 'eat' };
-    static get HAPPY_FUNC_NAME() { return 'happy' };
-    static get CLEAN_FUNC_NAME() { return 'clean' };
+  static get EAT_FUNC_NAME() { return 'eat' };
+  static get HAPPY_FUNC_NAME() { return 'run' };
+  static get CLEAN_FUNC_NAME() { return 'wash' };
 
-    constructor(maxStat = TamagModel.DEFAULT_MAX_STAT) {
-        this.maxStat = maxStat;
+  static get DOCTOR_FUNC_NAME() { return 'doctor' };
+  static get BUY_FOOD_FUNC_NAME() { return 'buy food' };
+  static get START_BUSINESS_FUNC_NAME() { return 'start a business' };
 
-        this.eatStat = Randomaizer.getRandom(TamagModel.DEFAULT_MIN_STAT, maxStat);
-        this.cleanStat = Randomaizer.getRandom(TamagModel.DEFAULT_MIN_STAT, maxStat);
-        this.happyStat = Randomaizer.getRandom(TamagModel.DEFAULT_MIN_STAT, maxStat);
+  static get GO_TO_WORK_FUNC_NAME() { return 'go to work' };
+  static get GO_TO_BAR_FUNC_NAME() { return 'go to bar' };
+
+  constructor(maxStat = TamagModel.DEFAULT_MAX_STAT) {
+    this.maxStat = maxStat;
+
+    this.eatStat = Randomaizer.getRandom(TamagModel.DEFAULT_MIN_STAT, maxStat);
+    this.cleanStat = Randomaizer.getRandom(TamagModel.DEFAULT_MIN_STAT, maxStat);
+    this.happyStat = Randomaizer.getRandom(TamagModel.DEFAULT_MIN_STAT, maxStat);
+    this.healthStat = Randomaizer.getRandom(TamagModel.DEFAULT_MIN_STAT, maxStat);
+    this.socializationStat = Randomaizer.getRandom(TamagModel.DEFAULT_MIN_STAT, maxStat);
+    this.moneyStat = Randomaizer.getRandom(TamagModel.DEFAULT_MIN_STAT, maxStat);
+  }
+
+  executeAction(action) {
+    switch (action) {
+      case TamagModel.EAT_FUNC_NAME:
+        return this._eat();
+      
+      case TamagModel.HAPPY_FUNC_NAME:
+        return this._happy();
+      
+      case TamagModel.CLEAN_FUNC_NAME:
+        return this._clean();
+      
+      case TamagModel.DOCTOR_FUNC_NAME:
+        return this._doctor();
+      
+      case TamagModel.BUY_FOOD_FUNC_NAME:
+        return this._buyFood();
+    
+      case TamagModel.START_BUSINESS_FUNC_NAME:
+        return this._startBusiness();      
+    
+      case TamagModel.GO_TO_WORK_FUNC_NAME:
+        return this._goTOWork();
+
+      case TamagModel.GO_TO_BAR_FUNC_NAME:
+        return this._goToBar();
+
+      default:
+        new Error('Unsupported tamag action name')
     }
+  }
 
-    executeAction(action) {
-        switch (action) {
-            case TamagModel.EAT_FUNC_NAME:
-                return this._eat();
-            case TamagModel.HAPPY_FUNC_NAME:
-                return this._happy();
-            case TamagModel.CLEAN_FUNC_NAME:
-                return this._clean();
-            default:
-                new Error('Unsupported tamag action name')
-        }
-    }
+  getStats() {
+    return [
+      new TamagDtoStats(this.eatStat, 'Eat'),
+      new TamagDtoStats(this.happyStat, 'Happy'),
+      new TamagDtoStats(this.cleanStat, 'Clean'),
 
-    getStats() {
-        return [
-            new TamagDto(this.eatStat, 'Eat', TamagModel.EAT_FUNC_NAME ),
-            new TamagDto(this.happyStat, 'Happy', TamagModel.HAPPY_FUNC_NAME ),
-            new TamagDto(this.cleanStat, 'Clean', TamagModel.CLEAN_FUNC_NAME ),
-        ]
-    }
+      new TamagDtoStats(this.healthStat, 'Health'),
+      new TamagDtoStats(this.socializationStat, 'Socialization'),
+      new TamagDtoStats(this.moneyStat, 'Money')
+    ]
+  }
 
-    isTamagDead() {
-        return !!this.getStats().find((statDto) => statDto.statValue < 0)
-    }
+  getBtns() {
+    return [
+      new TamagDtoButton('eat', TamagModel.EAT_FUNC_NAME),
+      new TamagDtoButton('run', TamagModel.HAPPY_FUNC_NAME),
+      new TamagDtoButton('wash', TamagModel.CLEAN_FUNC_NAME),
+      new TamagDtoButton('visit a doctor', TamagModel.DOCTOR_FUNC_NAME),
+      new TamagDtoButton('buy food', TamagModel.BUY_FOOD_FUNC_NAME),
+      new TamagDtoButton('start a business', TamagModel.START_BUSINESS_FUNC_NAME),
+      new TamagDtoButton('go to the bar', TamagModel.GO_TO_BAR_FUNC_NAME),
+      new TamagDtoButton('go to work', TamagModel.GO_TO_WORK_FUNC_NAME)
+    ]
 
-    decreaseStatsBy(num) {
-        this.eatStat -= num;
-        this.happyStat -= num;
-        this.cleanStat -= num;
-    }
+  }
 
-    _eat() {
-        this.eatStat = this._assignStat(this.eatStat, 30);
-        this.cleanStat -= 30;
-    }
+  isTamagDead() {
+    return !!this.getStats().find((statDto) => statDto.statValue < 0)
+  }
 
-    _clean() {
-        this.cleanStat = this._assignStat(this.cleanStat, 40);
-        this.happyStat -= 20;
-    }
+  decreaseStatsBy(num) {
+    this.eatStat -= num;
+    this.happyStat -= num;
+    this.cleanStat -= num;
+    this.healthStat -= num;
+    this.socializationStat -= num;
+  }
 
-    _happy() {
-        this.happyStat = this._assignStat(this.happyStat, 15);
-        this.eatStat -= 10;
-    }
+  _eat() {
+    this.eatStat = this._assignStat(this.eatStat, 30);
+    this.cleanStat -= 30;
+  }
 
-    _assignStat(stat, increaseBy) {
-        let result = stat + increaseBy;
-        return (result > this.maxStat) ? this.maxStat : result
-    }
+  _clean() {
+    this.cleanStat = this._assignStat(this.cleanStat, 40);
+    this.happyStat -= 20;
+  }
+
+  _happy() {
+    this.happyStat = this._assignStat(this.happyStat, 15);
+    this.eatStat -= 10;
+  }
+
+  _doctor() {
+    this.healthStat = this._assignStat(this.healthStat, 30);
+    this.moneyStat -= 20;
+  }
+
+  _buyFood() {
+    this.eatStat = this._assignStat(this.eatStat, 20);
+    this.moneyStat -= 20;
+  }
+
+  _goToBar() {
+    this.socializationStat = this._assignStat(this.socializationStat, 40);
+    this.eatStat = this._assignStat(this.eatStat, 10);
+    this.moneyStat -= 20;
+    this.healthStat -= 10;
+  }
+
+  _goTOWork() {
+    this.moneyStat +=  50;
+    this.eatStat -= 10;
+    this.healthStat -= 10;
+    this.socializationStat -= 20;
+  }
+
+  _startBusiness() {
+    this.moneyStat += 100
+    this.happyStat = this._assignStat(this.happyStat, 100);
+    this.healthStat -= 100;
+    this.socializationStat = this._assignStat(this.socializationStat, 20);
+  }
+
+  _assignStat(stat, increaseBy) {
+    let result = stat + increaseBy;
+    return (result > this.maxStat) ? this.maxStat : result
+  }
 }
 
 class TamagView {
-    constructor(elem) {
-        this.elem = elem;
-    };
+  constructor(elem) {
+    this.elem = elem;
+  };
 
-    setActionHandler(action) {
-        this.action = action;
-    }
+  setActionHandler(action) {
+    this.action = action;
+  }
 
-    // @param statsDtos Array <TeamDto>
-    // @param timerDto [TimerDto]
-    renderGame(statsDtos, timerDto) {
-        this.elem.innerHTML = null;
+  // @param statsDtos Array <TeamDto>
+  // @param timerDto [TimerDto]
+  renderGame(statsDtos, timerDto, btnsDtos) {
+    this.elem.innerHTML = null;
 
-        statsDtos.forEach((statProps) => {
-            let container = document.createElement('div');
-            container.style.display = 'flex';
+    statsDtos.forEach((statProps) => {
+      let container = document.createElement('div');
+      container.style.display = 'flex';
+      container.style.justifyContent ="center";
 
-            let statName = document.createElement('p');
-            statName.innerHTML = statProps.name;
+      let statName = document.createElement('p');
+      statName.innerHTML = statProps.name;
 
-            let statValueElem = document.createElement('p');
-            statValueElem.innerHTML = '        . . . .   ' + statProps.statValue + ' . . . ';
+      let statValueElem = document.createElement('p');
+      statValueElem.innerHTML = '    . . . .  ' + statProps.statValue + ' . . . ';
+      
+      container.appendChild(statName);
+      container.appendChild(statValueElem);
+      this.elem.appendChild(container)
+    });
 
-            let actionButton = document.createElement('button');
-            actionButton.innerHTML = statProps.actionName;
-            actionButton.addEventListener('click', () => {
-                this.action(statProps.actionName)
-            });
+    let container = document.createElement('div');    
+    container.style.display = 'flex';
+    container.style.margin = '0 auto'
+    container.style.justifyContent = 'space-around';
+    container.style.width = '700px';
 
-            container.appendChild(statName);
-            container.appendChild(statValueElem);
-            container.appendChild(actionButton);
+    btnsDtos.forEach((btn) => {
+      let actionButton = document.createElement('button');
+      actionButton.innerHTML = btn.name;
+      
+      container.appendChild(actionButton);
+      this.elem.appendChild(container)
+      actionButton.addEventListener('click', () => {
+        this.action(btn.btn);
+      });
+    });
 
-            this.elem.appendChild(container)
-        });
-
-        let timer = document.createElement('p');
-        timer.innerHTML = timerDto.minutes + ' : ' +  timerDto.seconds;
-
-        this.elem.appendChild(timer)
-    }
+    let timer = document.createElement('p');
+    timer.innerHTML = timerDto.minutes + ' : ' + timerDto.seconds;
+    timer.style.textAlign = 'center';
+    this.elem.appendChild(timer)
+  }
 }
 
+class TamgControllerAbstract {
+  constructor(temagView, tamagModel, main, seconds) {
+    this.temagView = temagView;
+    this.tamagModel = tamagModel;
 
-class TamgControllerAbstract{
-    constructor(temagView, tamagModel, main) {
-        this.temagView = temagView;
-        this.tamagModel = tamagModel;
+    this.main = main;
 
-        this.main = main;
+    this.temagView.setActionHandler(this.executeAction.bind(this));
 
-        this.temagView.setActionHandler(this.executeAction.bind(this));
+    this.startTime = new Date();
 
-        this.startTime = new Date();
+    this._initTimer();
+    this._initStatsDecreasing(seconds);
+  }
 
-        this._initTimer();
-        this._initStatsDecreasing();
-    }
+  render() { this._renderGame() };
 
-    render() { this._renderGame() };
+  executeAction(action) {
+    this.tamagModel.executeAction(action);
+    this._renderGame();
+  }
 
-    executeAction(action) {
-        this.tamagModel.executeAction(action);
-        this._renderGame();
-    }
+  _initTimer() {
+    this.timerId = setInterval(() => {
+      this._renderGame();
+    }, 1000)
+  };
 
-    _initTimer() {
-        this.timerId = setInterval(() => {
-            this._renderGame();
-        }, 1000)
-    };
+  _initStatsDecreasing(seconds) {
+    this.decreaseStatsId = setInterval(() => {
+      this._decreaseStats();
 
-    _initStatsDecreasing() {
-        this.decreaseStatsId =  setInterval(() => {
-            this._decreaseStats();
+      this._renderGame();
+    }, seconds * 1000)
+  };
 
-            this._renderGame();
-        }, 5000)
-    };
+  _renderGame() {
+    if (this.tamagModel.isTamagDead()) return this._gameOver();
+    this.temagView.renderGame(this._getTamagStats(), new TimerDto(this.startTime), this._getTamagBtns());
+  }
 
-    _renderGame() {
-        if (this.tamagModel.isTamagDead()) return this._gameOver();
+  _getTamagStats() {
+    return this.tamagModel.getStats();
+  }
 
-        this.temagView.renderGame(
-            this._getTamagStats(),
-            new TimerDto(this.startTime)
-        );
-    }
+  _getTamagBtns() {
+    return this.tamagModel.getBtns();
+  }
 
-    _getTamagStats() {
-        return this.tamagModel.getStats()
-    }
+  _gameOver() {
+    clearInterval(this.timerId);
+    clearInterval(this.decreaseStatsId);
+    this.main.changeState(new GameOverState(this.main))
+  }
 
-    _gameOver() {
-        clearInterval(this.timerId);
-        clearInterval(this.decreaseStatsId);
-        this.main.changeState(new GameOverState(this.main))
-    }
-
-    _decreaseStats() {
-        new Error('not implemented')
-    }
+  _decreaseStats() {
+    new Error('not implemented')
+  }
 }
 
 class TamagLazyController extends TamgControllerAbstract {
-    _decreaseStats() {
-        this.tamagModel.decreaseStatsBy(5);
-    }
+  _decreaseStats() {
+    this.tamagModel.decreaseStatsBy(3);
+  }
 }
 
-class TamagHardcoreController extends TamgControllerAbstract{
-    _decreaseStats() {
-        this.tamagModel.decreaseStatsBy(3);
-    }
+class TamagHardcoreController extends TamgControllerAbstract {
+  _decreaseStats() {
+    this.tamagModel.decreaseStatsBy(5);
+  }
 }
 
+class TamagNinjaController extends TamgControllerAbstract {
+  _decreaseStats() {
+    this.tamagModel.decreaseStatsBy(7);
+  }
+}
 
 class TamagFactory {
-    static get LAZY_TYPE() { return 'lazy' };
-    static get HARDCORE_TYPE() { return 'hardcore' };
+  static get LAZY_TYPE() { return 'lazy' };
+  static get HARDCORE_TYPE() { return 'hardcore' };
+  static get NINJA_TYPE() { return 'ninja' };
 
-    static get TAMAG_TYPES() { return [TamagFactory.LAZY_TYPE, TamagFactory.HARDCORE_TYPE] }
+  static get TAMAG_TYPES() { return [TamagFactory.LAZY_TYPE, TamagFactory.HARDCORE_TYPE, TamagFactory.NINJA_TYPE] }
 
-    static getGameByType(type, main) {
-        let tamagView = new TamagView(main.getRootElem());
+  static getGameByType(type, main) {
+    let tamagView = new TamagView(main.getRootElem());
 
-        switch (type) {
-            case TamagFactory.LAZY_TYPE:
-                return new TamagLazyController(tamagView, new TamagModel(), main);
-            case TamagFactory.HARDCORE_TYPE:
-                return new TamagHardcoreController(tamagView, new TamagModel(100), main);
-            default:
-                new Error('Unsupported type')
-        }
+    switch (type) {
+      case TamagFactory.LAZY_TYPE:
+        return new TamagLazyController(tamagView, new TamagModel(100), main, 5);
+      
+      case TamagFactory.HARDCORE_TYPE:
+        return new TamagHardcoreController(tamagView, new TamagModel(), main, 5);
+      
+      case TamagFactory.NINJA_TYPE:
+        return new TamagNinjaController(tamagView, new TamagModel(), main, 7);
+      
+      default:
+        new Error('Unsupported type')
     }
+  }
 }
 
-
 class NewGameState {
-    constructor(main) {
-        this.main = main;
-        this.elem = main.getRootElem();
-    };
+  constructor(main) {
+    this.main = main;
+    this.elem = main.getRootElem();
+  };
 
-    render() {
-        this.elem.innerHTML = null;
-        let select = document.createElement('select');
+  render() {
+    this.elem.innerHTML = null;
+    let select = document.createElement('select');
 
-        TamagFactory.TAMAG_TYPES.forEach((tamapType) => {
-            let option = document.createElement('option');
-            option.setAttribute('value', tamapType);
-            option.innerHTML = tamapType;
-            select.appendChild(option);
-        });
+    TamagFactory.TAMAG_TYPES.forEach((tamapType) => {
+      let option = document.createElement('option');
+      option.setAttribute('value', tamapType);
+      option.innerHTML = tamapType;
+      select.appendChild(option);
+    });
 
-        let button = document.createElement('button');
-        button.innerHTML = 'Start';
-        button.addEventListener('click', (event) => { this._handleStart(select) });
+    let button = document.createElement('button');
+    button.innerHTML = 'Start';
+    button.addEventListener('click', (event) => { this._handleStart(select) });
 
-        this.elem.appendChild(select);
-        this.elem.appendChild(button);
+    this.elem.appendChild(select);
+    this.elem.appendChild(button);
+  }
+
+  _handleStart(select) {
+    let selectedGameType = select.value;
+
+    if (TamagFactory.TAMAG_TYPES.includes(selectedGameType)) {
+      this._startNewGame(selectedGameType);
+    } else {
+      alert("select type");
     }
+  };
 
-    _handleStart(select) {
-        let selectedGameType = select.value;
-
-        if (TamagFactory.TAMAG_TYPES.includes(selectedGameType)) {
-            this._startNewGame(selectedGameType);
-        } else {
-            alert("select type");
-        }
-    };
-
-    _startNewGame(selectedGameType) {
-        this.main.changeState(new GameInProgressState(this.main, selectedGameType))
-    };
+  _startNewGame(selectedGameType) {
+    this.main.changeState(new GameInProgressState(this.main, selectedGameType))
+  };
 }
 
 class GameOverState {
-    constructor(main) {
-        this.main = main;
-        this.elem = main.getRootElem();
-    };
+  constructor(main) {
+    this.main = main;
+    this.elem = main.getRootElem();
+  };
 
-    render() {
-        let gameOver = document.createElement('p');
-        gameOver.innerHTML = 'YOU DIED';
+  render() {
+    let gameOver = document.createElement('p');
+    gameOver.innerHTML = 'YOU DIED';
+    gameOver.style.margin = '0 auto';
 
-        let button = document.createElement('button');
-        button.innerHTML = 'Start';
-        button.addEventListener('click', (event) => { this._startNewGame() });
+    let button = document.createElement('button');
+    button.innerHTML = 'Start';
+    button.style.margin = '0 auto';
+    button.addEventListener('click', (event) => { this._startNewGame() });
 
-        this.elem.appendChild(gameOver);
-        this.elem.appendChild(button);
-    }
+    this.elem.appendChild(gameOver);
+    this.elem.appendChild(button);
+  }
 
-    _startNewGame() {
-        this.main.changeState(new NewGameState(this.main));
-    };
+  _startNewGame() {
+    this.main.changeState(new NewGameState(this.main));
+  };
 }
 
 class GameInProgressState {
-    constructor(main, type) {
-        this.game = TamagFactory.getGameByType(type, main);
-    };
+  constructor(main, type) {
+    this.game = TamagFactory.getGameByType(type, main);
+  };
 
-    render(){
-        this.game.render();
-    }
+  render() {
+    this.game.render();
+  }
 }
-
 
 class Main {
 
-    static run(elem) {
-        new Main(elem).render();
-    }
+  static run(elem) {
+    new Main(elem).render();
+  }
 
-    constructor(elem) {
-        this.elem = elem;
-        this.state = new NewGameState(this);
-    }
+  constructor(elem) {
+    this.elem = elem;
+    this.state = new NewGameState(this);
+  }
 
-    changeState(state) {
-        this.state = state;
-        this.elem.innerHTML = null;
-        this.render();
-    }
+  changeState(state) {
+    this.state = state;
+    this.elem.innerHTML = null;
+    this.render();
+  }
 
-    getRootElem() {
-        return this.elem;
-    }
+  getRootElem() {
+    return this.elem;
+  }
 
-    render() {
-        this.state.render();
-    }
+  render() {
+    this.state.render();
+  }
 }
 
 Main.run(document.getElementById('game1'));
-// Main.run(document.getElementById('game2'));
-// Main.run(document.getElementById('game3'));
+
+Main.run(document.getElementById('game2'));
+Main.run(document.getElementById('game3'));
